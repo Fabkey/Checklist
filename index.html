@@ -457,7 +457,7 @@ const LISTS = [
       { title: 'Accessoires', icon: '📱', items: [
         {name:'Smartphone (geladen)'},{name:'Portemonnaie / Geld'},{name:'SBB-Billett oder GA'},
         {name:'Kontaktlinsen und Tropfen'},{name:'Kopfhörer für Zugreise'},{name:'Ladegerät'},
-        {name:'Sackmesser'},{name:'Sonnenbrille'},{name:'Sonnencrème'},{name:'Schmerzmittel'},
+        {name:'Sackmesser'},{name:'Sonnenbrille'},{name:'Sonnencrème'},{name:'Schmerzmittel'},{name:'Fernröhrli'}
       ]},
       { title: 'Verpflegung', icon: '🍎', items: [
         {name:'Trinkwasser'},{name:'Znüni'},{name:'Zmittag'},
@@ -561,10 +561,10 @@ const LISTS = [
       { title: 'Verpflegung & Kochen', icon: '🍳', items: [
         {name:'Pasta + Fertigsauce'},{name:'Risottoreis'},{name:'Makkaronen'},
         {name:'Müsli / Porridge'},{name:'Buchstabensuppen'},{name:'Bouillon'},
-        {name:'Wienerli'},{name:'Rollgersten'},{name:'Trockenfleisch / Snacks'},
+        {name:'Wienerli'},{name:'Rollgerste'},{name:'Trockenfleisch / Snacks'},
         {name:'Brot (Silserkranz / Laib)'},{name:'Nüsse (Cashews etc.)'},{name:'Süsses / Guetzli'},
         {name:'Knabbereien (Stengel, Darvida)'},{name:'Thermoskanne'},{name:'Kaffeekapseln (Nespresso)'},
-        {name:'Raclettegewürz'},
+        {name:'Raclettegewürz'😉},
       ]},
       { title: 'Für Kinder', icon: '👶', items: [
         {name:'Spielzeug + Büechli'},{name:'Malzeug'},{name:'Spiele (Gesellschaftsspiele)'},{name:'Schuhspray Refill'},
@@ -577,7 +577,7 @@ const LISTS = [
   {
     id: 'kind-ferien', label: 'Kind – Ferien', icon: '👶',
     title: 'Kind – Ferien / Wochenende',
-    desc: 'Ab 1.5 Jahren · mit Übernachtung',
+    desc: 'Ab 2.5 Jahren · mit Übernachtung',
     cats: [
       { title: 'Kleidung Kind', icon: '👕', items: [
         {name:'Body / T-Shirt'},{name:'Strumpfhosen'},{name:'Hosen'},{name:'Pullover'},
@@ -586,15 +586,15 @@ const LISTS = [
       ]},
       { title: 'Equipment', icon: '🛒', items: [
         {name:'Rucksack'},{name:'Kinderwagen'},{name:'Tragehilfe'},{name:'Picknick-Decke'},
-        {name:'Spielzeug / Stifte / Papier'},{name:'Ente Ingrid 🦆'},{name:'Sitzkissen'},
-        {name:'Kindersitz (Auto)'},{name:'Babyphone (inkl. Netzteil)'},{name:'Reise-Kinderbett'},
+        {name:'Spielzeug / Stifte / Papier'},{name:'Ente Ingrid 🦆'},{name:'Ente Hildi 🦆'},{name:'Sitzkissen'},
+        {name:'Kindersitz (Auto)'},{name:'Babyphone (inkl. Netzteil/Batterie)'},{name:'Reise-Kinderbett'},
       ]},
       { title: 'Ernährung', icon: '🍼', items: [
         {name:'Löffeli'},{name:'Latz'},{name:'Trinkbecher NUK'},{name:'Trinkbecher Erwachsene (öko)'},
         {name:'Habersack / Brei'},{name:'Früchte / Gemüse'},{name:'Knabbereien'},
       ]},
       { title: 'Pflege', icon: '🧴', items: [
-        {name:'Wickeletui'},{name:'Windeln'},{name:'Feuchttücher'},{name:'Noschi / Nuggi + Kette'},
+        {name:'Wickeletui'},{name:'Windeln'},{name:'Feuchttücher'},
         {name:'Plastiksäcke (gr./kl.)'},{name:'Dexeryl / Bepanthen'},{name:'Gesichtscrème'},
         {name:'Vitamin D'},{name:'Fiebermesser'},{name:'Zäpfchen / Schmerzmittel'},{name:'Sonnencrème'},
         {name:'Desinfektionsmittel'},{name:'Douchemittel / Shampoo'},{name:'Waschlappen'},
@@ -605,16 +605,16 @@ const LISTS = [
   {
     id: 'kind-tag', label: 'Kind – Tagesausflug', icon: '🌞',
     title: 'Kind – Tagesausflug',
-    desc: 'Yanna · ab 1.5 Jahren · ohne Übernachtung',
+    desc: 'Kids · ab 2.5 Jahren · ohne Übernachtung',
     cats: [
       { title: 'Equipment', icon: '🛒', items: [
         {name:'Rucksack / Kindertragerucksack'},{name:'Kinderwagen'},{name:'Picknick-Decke'},
-        {name:'Spielzeug'},{name:'Ente Ingrid 🦆'},{name:'Sitzkissen'},{name:'Kindersitz (Auto)'},
+        {name:'Spielzeug'},{name:'Ente Ingrid 🦆'},{name:'Ente Hildi 🦆'},{name:'Sitzkissen'},{name:'Kindersitz (Auto)'},
       ]},
       { title: 'Kleidung Kind', icon: '👕', items: [
         {name:'Body / T-Shirt'},{name:'Strumpfhosen'},{name:'Hosen / kurze Hose'},
         {name:'Pullover / Fleecepulli'},{name:'Jacke'},{name:'Regenjacke / -hose'},
-        {name:'Lätzli'},{name:'Kappe / Sonnenhut'},{name:'Socken'},{name:'Noschi'},
+        {name:'Lätzli'},{name:'Kappe / Sonnenhut'},{name:'Socken'},
       ]},
       { title: 'Ernährung', icon: '🍼', items: [
         {name:'Trinkwasser'},{name:'Löffeli'},{name:'Latz'},{name:'Trinkbecher NUK'},
@@ -622,7 +622,7 @@ const LISTS = [
       ]},
       { title: 'Pflege', icon: '🧴', items: [
         {name:'Wickeletui'},{name:'Windeln'},{name:'Feuchttücher'},
-        {name:'Noschi / Nuggi'},{name:'Sonnencrème'},{name:'Desinfektionsmittel'},
+        {name:'Sonnencrème'},{name:'Desinfektionsmittel'},
       ]},
       { title: 'Sommer', icon: '☀️', items: [
         {name:'Badwännli (faltbar)'},{name:'Badespielzeug'},{name:'Badewindeln'},
@@ -656,10 +656,7 @@ const LISTS = [
       ]},
       { title: 'Equipment', icon: '📦', items: [
         {name:'Faltkiste'},
-      ]},
-      { title: 'Ernährung Kind', icon: '🍼', items: [
-        {name:'Brei'},{name:'Pulver'},{name:'Löffeli'},{name:'Rapsöl'},
-        {name:'Thermoskanne'},{name:'Abpumpgerät'},
+        {name:'Wassersack oder Wasserflasche'},
       ]},
     ]
   },
