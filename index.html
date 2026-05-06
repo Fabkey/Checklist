@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklisten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Atkinson Hyperlegible — designed for low-vision readers */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #F7F5F1;
+  --surface:    #FFFFFF;
+  --border:     #B8B4AC;       /* strong border — visible at low contrast */
+  --text:       #1A1814;       /* ~18:1 on white */
+  --muted:      #4A4840;       /* ~9:1 on white */
+  --accent:     #1A4A2A;       /* ~10:1 on white */
+  --accent-bg:  #E0EBE4;
+  --done:       #165A28;       /* ~11:1 on white */
+  --done-bg:    #D4EBD9;
+  --bar-bg:     #D0CCC4;
+  --focus:      #0055CC;
+  --radius:     10px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Atkinson Hyperlegible', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.app { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 270px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 28px 22px 18px;
+  border-bottom: 2px solid var(--border);
+}
+
+.sidebar-logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.sidebar-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.sidebar-nav { padding: 10px 10px 16px; flex: 1; }
+
+.nav-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 12px 5px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  font-family: 'Atkinson Hyperlegible', Georgia, serif;
+  font-size: 15px;
+  font-weight: 400;
+  transition: background 0.12s;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--accent-bg); }
+.nav-item.active {
+  background: var(--accent);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+.nav-item.active .nav-progress { color: #A8D4B8; }
+
+.nav-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+.nav-label { flex: 1; line-height: 1.3; }
+.nav-progress { font-size: 12px; color: var(--muted); font-weight: 700; white-space: nowrap; }
+
+.nav-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.nav-dot.partial { border-color: #B05A00; background: #B05A00; }
+.nav-dot.done    { border-color: var(--done); background: var(--done); }
+.nav-item.active .nav-dot { border-color: rgba(255,255,255,0.4); }
+.nav-item.active .nav-dot.partial { background: #FFB366; border-color: #FFB366; }
+.nav-item.active .nav-dot.done    { background: #7FD4A0; border-color: #7FD4A0; }
+
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 2px solid var(--border);
+}
+.reset-all-btn {
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Atkinson Hyperlegible', Georgia, serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.reset-all-btn:hover { border-color: var(--text); color: var(--text); background: var(--bg); }
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  padding: 40px 40px 80px;
+  max-width: 700px;
+}
+
+/* ── PANEL ── */
+.list-panel { display: none; }
+.list-panel.visible { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.list-header { margin-bottom: 24px; }
+
+.list-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.list-emoji { font-size: 42px; line-height: 1; }
+
+.list-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.list-desc {
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+/* ── PROGRESS ── */
+.progress-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progress-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.progress-count {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+.progress-count span { font-size: 15px; color: var(--muted); font-weight: 400; }
+
+.bar-track {
+  height: 12px;
+  background: var(--bar-bg);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--done);
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  width: 0%;
+}
+
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-msg {
+  font-size: 14px;
+  color: var(--done);
+  font-weight: 700;
+  min-height: 20px;
+}
+
+.reset-btn {
+  background: none;
+  border: none;
+  font-family: 'Atkinson Hyperlegible', Georgia, serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 2px 0;
+}
+.reset-btn:hover { color: var(--text); }
+
+/* ── ALL DONE ── */
+.all-done {
+  display: none;
+  background: var(--done-bg);
+  border: 2px solid var(--done);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.all-done.visible { display: block; }
+.all-done-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--done);
+  margin-bottom: 4px;
+}
+.all-done-sub { font-size: 15px; color: var(--done); }
+
+/* ── CATEGORIES ── */
+.category { margin-bottom: 36px; }
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+}
+
+.cat-icon { font-size: 20px; }
+
+.cat-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+
+.cat-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg);
+  border: 2px solid var(--border);
+  padding: 2px 10px;
+  border-radius: 99px;
+}
+
+/* ── ITEMS ── */
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: 'Atkinson Hyperlegible', Georgia, serif;
+  margin-bottom: 2px;
+  transition: background 0.12s;
+}
+.item:hover { background: var(--accent-bg); }
+
+.checkbox {
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--accent);
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s;
+  background: white;
+}
+
+.item.checked .checkbox {
+  background: var(--done);
+  border-color: var(--done);
+}
+
+.checkmark {
+  opacity: 0;
+  transform: scale(0.4);
+  transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+.item.checked .checkmark { opacity: 1; transform: scale(1); }
+
+.item-body { flex: 1; }
+
+.item-name {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.45;
+  transition: color 0.15s;
+}
+
+.item.checked .item-name {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--muted);
+  text-decoration-thickness: 2px;
+}
+
+.item-note {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* ── MOBILE ── */
+.mobile-nav-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 98;
+}
+
+@media (max-width: 700px) {
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    z-index: 99;
+    transition: left 0.25s ease;
+    height: 100vh;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.2);
+  }
+  .sidebar.open { left: 0; }
+  .mobile-overlay.open { display: block; }
+  .mobile-nav-btn { display: flex; }
+  .main { padding: 24px 20px 100px; max-width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="sidebar" id="sidebar" aria-label="Listen-Navigation">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">Checklisten</div>
+      <div class="sidebar-sub">Alle Listen auf einen Blick</div>
+    </div>
+    <div class="sidebar-nav" id="sidebar-nav"></div>
+    <div class="sidebar-footer">
+      <button class="reset-all-btn" onclick="resetAll()">↺ Alle Listen zurücksetzen</button>
+    </div>
+  </nav>
+
+  <div class="mobile-overlay" id="mobile-overlay" onclick="closeSidebar()"></div>
+  <main class="main" id="main-content" aria-live="polite"></main>
+  <button class="mobile-nav-btn" id="mobile-nav-btn" aria-label="Navigation öffnen" onclick="toggleSidebar()">☰</button>
+</div>
+
+<script>
+const LISTS = [
+  {
+    id: 'basis', label: 'Basis', icon: '🎒',
+    title: 'Basis-Ausrüstung',
+    desc: 'Gemeinsame Grundausstattung — gilt für alle Aktivitäten',
+    cats: [
+      { title: 'Accessoires', icon: '📱', items: [
+        {name:'Smartphone (geladen)'},{name:'Portemonnaie / Geld'},{name:'SBB-Billett oder GA'},
+        {name:'Kontaktlinsen und Tropfen'},{name:'Kopfhörer für Zugreise'},{name:'Ladegerät'},
+        {name:'Sackmesser'},{name:'Sonnenbrille'},{name:'Sonnencrème'},{name:'Schmerzmittel'},
+      ]},
+      { title: 'Verpflegung', icon: '🍎', items: [
+        {name:'Trinkwasser'},{name:'Znüni'},{name:'Zmittag'},
+        {name:'Früchte'},{name:'Knabbereien'},{name:'Nüsse'},
+      ]},
+      { title: 'Bei Übernachtung', icon: '🌙', items: [
+        {name:'Stirnlampe'},{name:'Socken (extra)'},{name:'Unterhosen (extra)'},
+        {name:'T-Shirt (extra)'},{name:'Schuhe (Finken/Hütte)'},{name:'Schnelltrocknungstuch'},
+        {name:'Zahnbürste + Zahnpasta'},{name:'Deo'},
+      ]},
+    ]
+  },
+  {
+    id: 'wandern', label: 'Wandern', icon: '🥾',
+    title: 'Wandern',
+    desc: 'Tagestouren und Mehrtagestouren',
+    cats: [
+      { title: 'Kleidung & Equipment', icon: '🧥', items: [
+        {name:'Rucksack'},{name:'Wanderschuhe'},{name:'Hose (kurz/lang)'},
+        {name:'Wanderstöcke'},{name:'Regen-/Windjacke'},{name:'Pullover'},
+        {name:'Funktionskleidung'},{name:'Long Sleeve'},{name:'Cap / Sonnenhut'},
+        {name:'Buff / Schlauchschal'},{name:'Kniebandage'},{name:'Wassersack oder Wasserflasche'},
+      ]},
+      { title: 'Velo (falls nötig)', icon: '🚲', items: [
+        {name:'Helm'},{name:'Rücklicht'},{name:'Vorderlicht'},
+        {name:'Fr. 1.– (Veloständer)'},{name:'Velotasche'},
+      ]},
+      { title: 'Übernachtung extra', icon: '🌙', items: [
+        {name:'Tüchli / Handtuch'},{name:'Badehosen'},
+      ]},
+    ]
+  },
+  {
+    id: 'klettern', label: 'Klettern', icon: '🧗',
+    title: 'Klettern',
+    desc: 'Wanderausrüstung + vollständiges Kletterequipment',
+    cats: [
+      { title: 'Kleidung & Equipment', icon: '🧥', items: [
+        {name:'Rucksack'},{name:'Wanderschuhe'},{name:'Hose (kurz/lang)'},
+        {name:'Wanderstöcke'},{name:'Regen-/Windjacke'},{name:'Pullover / Funktionskleidung'},
+        {name:'Cap / Sonnenhut'},{name:'Buff / Schlauchschal'},{name:'Kniebandage'},
+        {name:'Wassersack oder Wasserflasche'},
+      ]},
+      { title: 'Kletterequipment', icon: '🪢', items: [
+        {name:'Klettergurt / Gstältli'},{name:'Expressen (7×)'},{name:'Seil (60 m)'},
+        {name:'Helm'},{name:'Bandschlingen'},{name:'Abseilgerät / Tuber'},
+        {name:'Sicherungs-Karabiner (div.)'},{name:'Kletterfinken'},
+      ]},
+      { title: 'Velo (falls nötig)', icon: '🚲', items: [
+        {name:'Helm'},{name:'Rücklicht'},{name:'Vorderlicht'},{name:'Fr. 1.– (Veloständer)'},
+      ]},
+    ]
+  },
+  {
+    id: 'snowboard', label: 'Snowboarden', icon: '🏂',
+    title: 'Snowboarden',
+    desc: 'Tagesausflug oder Übernachtung auf der Piste',
+    cats: [
+      { title: 'Kleidung & Equipment', icon: '🧥', items: [
+        {name:'Touren-Rucksack'},{name:'Snowboard-Brille'},{name:'Snowboard-Schuhe'},
+        {name:'Snowboard-Hose'},{name:'Snowboard-Jacke'},{name:'Rückenpanzer'},
+        {name:'Knieschoner'},{name:'Kniebandage'},{name:'Helm'},{name:'Handschuhe'},
+        {name:'Pullover / Fleece'},{name:'Funktionskleidung'},{name:'Cap / Sonnenhut'},
+        {name:'Buff / Schlauchschal'},{name:'Socken (Ski-Socken)'},{name:'Sitzkissen'},
+        {name:'Wassersack oder Wasserflasche'},
+      ]},
+      { title: 'Tickets & Diverses', icon: '🎫', items: [
+        {name:'Tageskarte (online buchen!)'},{name:'Buch / Reportagen für Zugreise'},
+      ]},
+    ]
+  },
+  {
+    id: 'skitouren', label: 'Skitouren', icon: '⛷',
+    title: 'Skiferien Touren',
+    desc: 'Mehrtägig · Splitboard · Tourengehen',
+    cats: [
+      { title: 'Tourenspezifisch', icon: '🏔', items: [
+        {name:'Splitboard'},{name:'Felle'},{name:'Harscheisen'},{name:'Tourenstöcke'},
+        {name:'Snowboard-Bag / Rucksäcke'},{name:'Sturmmasken'},{name:'Stirnband'},
+        {name:'Fleecepulli (extra)'},{name:'Fernröhrli'},{name:'Kursunterlagen (falls Kurs)'},
+      ]},
+      { title: 'Kleidung mehrtägig', icon: '🧥', items: [
+        {name:'T-Shirts (mehrere)'},{name:'Pullis'},{name:'Trainerhosen'},
+        {name:'Unterhosen (mehrere)'},{name:'Socken (mehrere)'},{name:'Pyjamas'},
+        {name:'Jeans / Ausgeh-Hose'},{name:'Turnschuhe / Finken'},
+      ]},
+      { title: 'Necessaire', icon: '🧴', items: [
+        {name:'Kontaktlinsen + Mittel'},{name:'Zahnpflege (Seide / Bürste / Pasta)'},
+        {name:'Augentropfen'},{name:'Sonnencrème (hoch LSF)'},{name:'Deodorant'},
+        {name:'Erste-Hilfe-Set'},{name:'Waschlappen'},{name:'Duschmittel + Shampoo'},
+        {name:'Bürste / Kamm'},{name:'Nastücher'},{name:'Handcrème'},
+        {name:'Blasenpflaster'},{name:'Bepanthen'},{name:'Schmerzmittel (Dul-X etc.)'},
+      ]},
+    ]
+  },
+  {
+    id: 'skiferien', label: 'Skiferien', icon: '🏔',
+    title: 'Skiferien',
+    desc: 'Mehrtägig · Selbstkochen · Familie',
+    cats: [
+      { title: 'Verpflegung & Kochen', icon: '🍳', items: [
+        {name:'Pasta + Fertigsauce'},{name:'Risottoreis'},{name:'Makkaronen'},
+        {name:'Müsli / Porridge'},{name:'Buchstabensuppen'},{name:'Bouillon'},
+        {name:'Wienerli'},{name:'Rollgersten'},{name:'Trockenfleisch / Snacks'},
+        {name:'Brot (Silserkranz / Laib)'},{name:'Nüsse (Cashews etc.)'},{name:'Süsses / Guetzli'},
+        {name:'Knabbereien (Stengel, Darvida)'},{name:'Thermoskanne'},{name:'Kaffeekapseln (Nespresso)'},
+        {name:'Raclettegewürz'},
+      ]},
+      { title: 'Für Kinder', icon: '👶', items: [
+        {name:'Spielzeug + Büechli'},{name:'Malzeug'},{name:'Spiele (Gesellschaftsspiele)'},{name:'Schuhspray Refill'},
+      ]},
+      { title: 'Organisation', icon: '📋', items: [
+        {name:'Öl, Essig, Gewürze klären (vor Ort?)'},{name:'Bob / Schlitten klären'},{name:'Tageskarten online buchen'},
+      ]},
+    ]
+  },
+  {
+    id: 'kind-ferien', label: 'Kind – Ferien', icon: '👶',
+    title: 'Kind – Ferien / Wochenende',
+    desc: 'Ab 1.5 Jahren · mit Übernachtung',
+    cats: [
+      { title: 'Kleidung Kind', icon: '👕', items: [
+        {name:'Body / T-Shirt'},{name:'Strumpfhosen'},{name:'Hosen'},{name:'Pullover'},
+        {name:'Jacke / Walk-Anzug'},{name:'Lätzli'},{name:'Kappe / Sonnenhut'},
+        {name:'Socken'},{name:'Sonnenbrille'},{name:'Pyjama'},{name:'Schlafsack'},{name:'Finken'},{name:'Schuhe'},
+      ]},
+      { title: 'Equipment', icon: '🛒', items: [
+        {name:'Rucksack'},{name:'Kinderwagen'},{name:'Tragehilfe'},{name:'Picknick-Decke'},
+        {name:'Spielzeug / Stifte / Papier'},{name:'Ente Ingrid 🦆'},{name:'Sitzkissen'},
+        {name:'Kindersitz (Auto)'},{name:'Babyphone (inkl. Netzteil)'},{name:'Reise-Kinderbett'},
+      ]},
+      { title: 'Ernährung', icon: '🍼', items: [
+        {name:'Löffeli'},{name:'Latz'},{name:'Trinkbecher NUK'},{name:'Trinkbecher Erwachsene (öko)'},
+        {name:'Habersack / Brei'},{name:'Früchte / Gemüse'},{name:'Knabbereien'},
+      ]},
+      { title: 'Pflege', icon: '🧴', items: [
+        {name:'Wickeletui'},{name:'Windeln'},{name:'Feuchttücher'},{name:'Noschi / Nuggi + Kette'},
+        {name:'Plastiksäcke (gr./kl.)'},{name:'Dexeryl / Bepanthen'},{name:'Gesichtscrème'},
+        {name:'Vitamin D'},{name:'Fiebermesser'},{name:'Zäpfchen / Schmerzmittel'},{name:'Sonnencrème'},
+        {name:'Desinfektionsmittel'},{name:'Douchemittel / Shampoo'},{name:'Waschlappen'},
+        {name:'Zahngel + Zahnbürste'},{name:'Handwaschmittel + Gallseife'},{name:'Milette Tücher'},
+      ]},
+    ]
+  },
+  {
+    id: 'kind-tag', label: 'Kind – Tagesausflug', icon: '🌞',
+    title: 'Kind – Tagesausflug',
+    desc: 'Yanna · ab 1.5 Jahren · ohne Übernachtung',
+    cats: [
+      { title: 'Equipment', icon: '🛒', items: [
+        {name:'Rucksack / Kindertragerucksack'},{name:'Kinderwagen'},{name:'Picknick-Decke'},
+        {name:'Spielzeug'},{name:'Ente Ingrid 🦆'},{name:'Sitzkissen'},{name:'Kindersitz (Auto)'},
+      ]},
+      { title: 'Kleidung Kind', icon: '👕', items: [
+        {name:'Body / T-Shirt'},{name:'Strumpfhosen'},{name:'Hosen / kurze Hose'},
+        {name:'Pullover / Fleecepulli'},{name:'Jacke'},{name:'Regenjacke / -hose'},
+        {name:'Lätzli'},{name:'Kappe / Sonnenhut'},{name:'Socken'},{name:'Noschi'},
+      ]},
+      { title: 'Ernährung', icon: '🍼', items: [
+        {name:'Trinkwasser'},{name:'Löffeli'},{name:'Latz'},{name:'Trinkbecher NUK'},
+        {name:'Trinkbecher Erwachsene (öko)'},{name:'Habersack / Brei'},{name:'Früchte / Gemüse'},{name:'Knabbereien'},
+      ]},
+      { title: 'Pflege', icon: '🧴', items: [
+        {name:'Wickeletui'},{name:'Windeln'},{name:'Feuchttücher'},
+        {name:'Noschi / Nuggi'},{name:'Sonnencrème'},{name:'Desinfektionsmittel'},
+      ]},
+      { title: 'Sommer', icon: '☀️', items: [
+        {name:'Badwännli (faltbar)'},{name:'Badespielzeug'},{name:'Badewindeln'},
+        {name:'Sonnenschirm'},{name:'Sändelizeugs'},{name:'Wasserschlüssel / 4-Kant'},
+      ]},
+      { title: 'Diverses', icon: '📋', items: [
+        {name:'Ersatzkleidung + Pflegematerial'},{name:'Nothilfeset'},
+        {name:'Bücher / Zeitung'},{name:'Einkaufstüten'},{name:'Einkaufszettel'},
+      ]},
+    ]
+  },
+];
+
+// ── STATE ──
+const KEY = 'checklisten_v2';
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e) {}
+let activeId = LISTS[0].id;
+
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+function getProgress(id) {
+  const list = LISTS.find(l => l.id === id);
+  const ch = state[id] || {};
+  let total = 0, done = 0;
+  list.cats.forEach((cat, ci) => cat.items.forEach((_, ii) => { total++; if(ch[`${ci}-${ii}`]) done++; }));
+  return { total, done, pct: total ? Math.round(done/total*100) : 0 };
+}
+
+function toggle(listId, ci, ii) {
+  if (!state[listId]) state[listId] = {};
+  const k = `${ci}-${ii}`;
+  state[listId][k] = !state[listId][k];
+  save();
+  renderPanel(listId);
+  updateNav(listId);
+}
+
+function resetList(id) {
+  state[id] = {}; save();
+  renderPanel(id); updateNav(id);
+}
+
+function resetAll() {
+  if (!confirm('Alle Listen zurücksetzen?')) return;
+  state = {}; save();
+  LISTS.forEach(l => updateNav(l.id));
+  renderPanel(activeId);
+}
+
+// ── NAV ──
+function buildNav() {
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = '';
+  LISTS.forEach(list => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-item' + (list.id === activeId ? ' active' : '');
+    btn.id = `nav-${list.id}`;
+    btn.onclick = () => { activate(list.id); closeSidebar(); };
+    updateNavBtn(btn, list);
+    nav.appendChild(btn);
+  });
+}
+
+function updateNavBtn(btn, list) {
+  const { done, total } = getProgress(list.id);
+  const dotClass = done === 0 ? '' : done === total ? 'done' : 'partial';
+  btn.innerHTML = `
+    <span class="nav-icon" aria-hidden="true">${list.icon}</span>
+    <span class="nav-label">${list.label}</span>
+    <span class="nav-progress" aria-hidden="true">${done}/${total}</span>
+    <span class="nav-dot ${dotClass}" aria-hidden="true"></span>`;
+  btn.setAttribute('aria-label', `${list.label}, ${done} von ${total} erledigt`);
+}
+
+function updateNav(id) {
+  const btn = document.getElementById(`nav-${id}`);
+  if (!btn) return;
+  const list = LISTS.find(l => l.id === id);
+  updateNavBtn(btn, list);
+}
+
+function activate(id) {
+  activeId = id;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById(`nav-${id}`)?.classList.add('active');
+  document.querySelectorAll('.list-panel').forEach(p => p.classList.remove('visible'));
+  const existing = document.getElementById(`panel-${id}`);
+  if (existing) { existing.classList.add('visible'); }
+  else { renderPanel(id); }
+  window.scrollTo(0,0);
+}
+
+// ── RENDER ──
+function renderPanel(id) {
+  const list = LISTS.find(l => l.id === id);
+  const ch = state[id] || {};
+  const { done, total, pct } = getProgress(id);
+
+  const msgs = ['','Gut gestartet!','Auf Kurs.','Mehr als die Hälfte!','Fast alles dabei.','Noch der letzte Griff …','Alles eingepackt! ✓'];
+  const mi = pct===0?0:pct<20?1:pct<40?2:pct<60?3:pct<80?4:pct<100?5:6;
+
+  const catsHtml = list.cats.map((cat, ci) => {
+    const cd = cat.items.filter((_,ii) => ch[`${ci}-${ii}`]).length;
+    const items = cat.items.map((item,ii) => {
+      const ok = !!ch[`${ci}-${ii}`];
+      return `<button class="item${ok?' checked':''}"
+        onclick="toggle('${id}',${ci},${ii})"
+        aria-pressed="${ok}"
+        aria-label="${item.name}${item.note?', '+item.note:''}">
+        <span class="checkbox" aria-hidden="true"><span class="checkmark">✓</span></span>
+        <span class="item-body">
+          <span class="item-name">${item.name}</span>
+          ${item.note?`<span class="item-note">${item.note}</span>`:''}
+        </span>
+      </button>`;
+    }).join('');
+    return `<div class="category" role="region" aria-label="${cat.title}">
+      <div class="cat-header">
+        <span class="cat-icon" aria-hidden="true">${cat.icon}</span>
+        <h2 class="cat-title">${cat.title}</h2>
+        <span class="cat-count" aria-label="${cd} von ${cat.items.length}">${cd}/${cat.items.length}</span>
+      </div>${items}</div>`;
+  }).join('');
+
+  const allDone = done===total&&total>0
+    ? `<div class="all-done visible" role="status">
+        <div class="all-done-title">Alles eingepackt! ${list.icon}</div>
+        <div class="all-done-sub">Bereit für ${list.label}.</div>
+       </div>` : `<div class="all-done" role="status"></div>`;
+
+  const html = `<div class="list-panel visible" id="panel-${id}" role="region" aria-label="${list.title}">
+    <div class="list-header">
+      <div class="list-title-row">
+        <span class="list-emoji" aria-hidden="true">${list.icon}</span>
+        <h1 class="list-title">${list.title}</h1>
+      </div>
+      <p class="list-desc">${list.desc}</p>
+    </div>
+    <div class="progress-card" role="status" aria-label="Fortschritt: ${done} von ${total} erledigt">
+      <div class="progress-top">
+        <span class="progress-label">Fortschritt</span>
+        <span class="progress-count">${done} <span>/ ${total}</span></span>
+      </div>
+      <div class="bar-track" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
+        <div class="bar-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="progress-row">
+        <span class="progress-msg">${msgs[mi]}</span>
+        <button class="reset-btn" onclick="resetList('${id}')">↺ zurücksetzen</button>
+      </div>
+    </div>
+    ${allDone}
+    ${catsHtml}
+  </div>`;
+
+  const main = document.getElementById('main-content');
+  const existing = document.getElementById(`panel-${id}`);
+  if (existing) existing.outerHTML = html;
+  else {
+    main.querySelectorAll('.list-panel').forEach(p => p.classList.remove('visible'));
+    main.insertAdjacentHTML('beforeend', html);
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('mobile-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobile-overlay').classList.remove('open');
+}
+
+buildNav();
+renderPanel(activeId);
+</script>
+</body>
+</html>
