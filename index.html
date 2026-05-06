@@ -564,7 +564,7 @@ const LISTS = [
         {name:'Wienerli'},{name:'Rollgerste'},{name:'Trockenfleisch / Snacks'},
         {name:'Brot (Silserkranz / Laib)'},{name:'Nüsse (Cashews etc.)'},{name:'Süsses / Guetzli'},
         {name:'Knabbereien (Stengel, Darvida)'},{name:'Thermoskanne'},{name:'Kaffeekapseln (Nespresso)'},
-        {name:'Raclettegewürz'😉},
+        {name:'Raclettegewürz'},
       ]},
       { title: 'Für Kinder', icon: '👶', items: [
         {name:'Spielzeug + Büechli'},{name:'Malzeug'},{name:'Spiele (Gesellschaftsspiele)'},{name:'Schuhspray Refill'},
@@ -806,10 +806,12 @@ function renderPanel(id) {
   </div>`;
 
   const main = document.getElementById('main-content');
+  main.querySelectorAll('.list-panel').forEach(p => p.classList.remove('visible'));
   const existing = document.getElementById(`panel-${id}`);
-  if (existing) existing.outerHTML = html;
-  else {
-    main.querySelectorAll('.list-panel').forEach(p => p.classList.remove('visible'));
+  if (existing) {
+    existing.outerHTML = html;
+    document.getElementById(`panel-${id}`).classList.add('visible');
+  } else {
     main.insertAdjacentHTML('beforeend', html);
   }
 }
